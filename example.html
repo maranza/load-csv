@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    Select a file: <input type="file" id="myFile" accept=".csv">
+<button onclick='processFile()'>Process</button>
+
+
+<script>
+
+function processFile(){
+  var file = document.querySelector('#myFile').files[0];
+  var reader = new FileReader();
+  reader.readAsText(file);
+
+  //if you need to read a csv file with a 'ISO-8859-1' encoding
+  /*reader.readAsText(file,'ISO-8859-1');*/
+
+  //When the file finish load
+  reader.onload = function(event) {
+
+    //get the file.
+    var csv = event.target.result;
+
+    //split and get the rows in an array
+    var rows = csv.split('\n');
+
+    //move line by line
+    for (var i = 0; i < rows.length; i++) {
+      //split by separator (,) and get the columns
+      cols = rows[i].split(';'); // TODO: USE Appropriate separator
+      console.log("Row-->" + cols);
+      //move column by column
+      for (var j = 0; j < cols.length; j++) {
+        /*the value of the current column.
+        Do whatever you want with the value*/
+        var value = cols[j];
+      }
+      // TODO: Here pass the variables to the createPoint Function.
+    }
+  }
+} 
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+    
+
+
+    <div class="container" style="padding:10px 10px;">
+
+        <div class="row" <div class="row" id="parsed_csv_list"></div>
+
+        <!-- ====================================================== -->
+
+        <h1>Read CSV file using JavaScript</h1>
+        <div id="header"></div>
+        <div class="well">
+            <div class="row">
+                <form class="form-inline" id="form">
+                    <div class="form-group">
+                        <label for="files">Upload a CSV formatted file:</label>
+                        <input type="file" id="files" class="form-control" accept=".csv" required />
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="submit-file" class="btn btn-primary">Upload File</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- <div class="row" style="margin:30px 0px 50px 50px;">
+        <a class="btn btn-default read-more" style="background:#3399ff;color:white"
+            href="https://www.js-tutorials.com/javascript-tutorial/reading-csv-file-using-javascript-html5/">Back to
+            Tutorial</a>
+    </div> -->
+    <div id="footer"></div>
+    </div>
+
+    
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+    </script>
+    <script src="PapaParse-5.0.2/papaparse.min.js"></script>
+    <script src="jquery-csv.min.js"></script>
+
+    <script>
+
+        $('#submit-file').on("click", function (e) {
+            e.preventDefault();
+            $('#files').parse({
+                config: {
+                    // delimiter: "auto",
+                    complete: displayHTMLTable,
+                },
+                // before: function (file, inputElem) {
+                //     console.log("Parsing file...", file);
+                //     // data = $.csv.toArrays(file);
+                //     // generateHtmlTable(data);
+                // },
+                // error: function (err, file) {
+                //     console.log("ERROR:", err, file);
+                // },
+                // complete: function () {
+                //     console.log("Done with all files");
+                // }
+            });
+        });
+
+        function processPoint(point){
+            
+        }
+
+        function displayHTMLTable(results) {
+            var table = "<table class='table'>";
+            var data = results.data;
+            var delimeter = results.meta.delimiter;
+
+            var point = {}
+
+            for (i = 1; i < data.length; i++) {
+                table += "<tr>";
+                var row = data[i];
+                var cells = row.join(delimeter).split(delimeter);
+
+                // console.log(cells);
+
+                console.log(point);
+                point = createPoint(cells);
+                process_new_point(point['coordinate'], true, point);
+
+                for (j = 0; j < cells.length; j++) {
+                    table += "<td>";
+                    table += cells[j]; // this data is the one passed the point function
+                    table += "</td>";
+                }
+                table += "</tr>";
+            }
+            table += "</table>";
+            $("#parsed_csv_list").html(table);
+
+            // var coordinate= [longitude,latitude];
+
+            process_new_point(point['coordinate'], true, point);
+
+        }
+
+        function createPoint(cells){
+          var point = {};
+
+          point['deviceName'] = cells[0];
+          point['deviceCategory'] = cells[1];
+          point['antennaHeight'] = cells[2];
+          point['antennaGain'] = cells[3];
+          point['cableLosses'] = cells[4];
+          point['maxEIRP'] = cells[5];
+          point['technology'] = cells[6];
+          point['sensitivity'] = cells[7];
+          point['deviceType'] = cells[8];
+          point['situation'] = cells[9];
+          point['coordinate'] = [cells[10], cells[11]];
+
+          return point;
+        }
+
+        function process_new_point(coordinate, addingNew=true, point=null){
+					// overlay.setPosition(undefined);
+          var submitted = false;
+					// closer.blur();
+				  if (!submitted || (submitted && allow_new_points)) {                    
+				    var pointToCheck = [];
+                    if (point !== null){
+                        pointToCheck.push({
+                            index: 0,
+                            coordinate: coordinate,
+                            device_id: create_UUID(),
+                            valid: false,
+                            antenna_height: 0,
+                            emission_class: "",
+                            location_type: "NOMADIC",
+                            device_category: "Client",
+                            tech_Id: "",
+                            r_channels: null
+                        });
+                    }else{
+                        pointToCheck.push(point);
+                    }
+				    
+            var url = "localhost:8082/loggedin/maps/location";
+            var requestData =  JSON.stringify(pointToCheck);
+            console.log(requestData);
+            var ajaxCall = createAjaxCall(url, requestData);
+            ajaxCall.fail(function (err) {
+              // clear_lat_long_fields();
+              if (err.responseText === "") {
+                popDialog("Could not determine if location is inside the coverage area."
+                  + " Please contact your system administrator to check the database.");
+              }
+              // console.log(err);
+            });
+				    ajaxCall.done(function(results){
+				      // clear_lat_long_fields();
+				      if (results !== null && results !== "outsideCoverage" && results !== "unclassified") {
+				    	  relocatePoint = true;
+				        // var pixel = map.getPixelFromCoordinate(pointToCheck[0].coordinate);
+				        // var fl = map.forEachFeatureAtPixel(pixel, function (feature, layer) {
+				        //   return {
+				        //     feature: feature,
+				        //     layer: layer
+				        //   }
+				        // });
+				        if (fl != null && fl.feature) {
+				          switch (fl.layer) {
+				            case ska_karoo:
+				            	relocatePoint = false
+				              document.getElementById("popup").style.overflowY = "hidden";   
+				              content.innerHTML = "Please note that you have selected a point \ninside the SKA Protected Area";
+				              overlay.setPosition(pointToCheck[0].coordinate);
+				              break;
+				          }
+				        }
+				        if (addingNew){
+					        count++;
+					        addPoint(points.length, coordinate, results);
+				        }
+				      }else if(results !== null && results === "outsideCoverage") {
+			          relocatePoint = false;
+				        clear_lat_long_fields();
+				        popDialog("The selected point is outside of the coverage area");
+				      }
+				      if (!addingNew){
+				    	  relocateTranslatedPoint(coordinate, relocatePoint);
+				      }
+				    });
+				  }
+				}
+
+        function createAjaxCall(url, requestData, requestType = 'POST') {
+          return $.ajax({
+            url: url,
+            contentType: 'application/json',
+            dataType: 'JSON',
+            processData: true,
+            type: requestType,
+            cache: false,
+            timeout: 0,
+            xhrFields: { withCredentials: true },
+            data: requestData,
+          });
+      }
+
+
+    </script>
+
+
+</body>
+</html>
